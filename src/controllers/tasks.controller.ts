@@ -1,5 +1,5 @@
 import type { Request, Response } from "express"
-import { tasksService } from "../services/tasks.service"
+import { tasksService } from "../services/history.service"
 
 export const tasksController = {
     async create(req: Request, res: Response) {
