@@ -14,6 +14,11 @@ datasource db {
 
 // ====== TABELA DE USUARIOS ======
 
+enum RoleType {
+  ADMIN
+  MEMBER
+}
+
 model User {
   id        Int        @id @default(autoincrement())
   name      String?
@@ -21,6 +26,7 @@ model User {
   password  String?
   createdAt DateTime   @default(now())
   userRoles UserRole[]
+  tokens    Token[]
 }
 
 model Role {
@@ -38,9 +44,24 @@ model UserRole {
   @@id([userId, roleId])
 }
 
-enum RoleType {
-  ADMIN
-  MEMBER
+// ====== TABELA DE TOKEN ======
+
+model Token {
+  id        Int       @id @default(autoincrement())
+  token     String    @db.VarChar(255)
+  type      TypeToken @default(ACCESS)
+  revoked   Boolean   @default(false)
+  expiresAt DateTime
+  userId    Int
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("token")
+}
+
+enum TypeToken {
+  ACCESS
+  REFRESH
 }
 
 // ====== TABELA DE TAREFAS ======
