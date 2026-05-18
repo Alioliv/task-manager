@@ -1,11 +1,12 @@
 {
-  "compilerOptions": {
-    "rootDir": "./src",
+  "compilerOptions": 
+  {
+    "rootDir": "./", 
     "outDir": "./dist",
     "module": "esnext",
     "moduleResolution": "bundler",
     "strict": true,
-    "types": [],
+    "types": ["node"],
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -23,7 +24,8 @@
     "forceConsistentCasingInFileNames": true,
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "prisma.config.ts"
   ],
   "exclude": [
     "node_modules"
