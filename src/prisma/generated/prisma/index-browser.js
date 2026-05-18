@@ -131,7 +131,7 @@ exports.Prisma.TaskScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.TaskHistoryScalarFieldEnum = {
+exports.Prisma.HistoryScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
   eventType: 'eventType',
@@ -174,7 +174,7 @@ exports.EventType = exports.$Enums.EventType = {
 
 exports.Prisma.ModelName = {
   Task: 'Task',
-  TaskHistory: 'TaskHistory'
+  History: 'History'
 };
 
 /**
