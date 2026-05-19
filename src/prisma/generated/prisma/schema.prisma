@@ -51,7 +51,7 @@ model History {
   eventType EventType
   createdAt DateTime  @default(now())
 
-  task      Task      @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
 }
 
 enum EventType {
