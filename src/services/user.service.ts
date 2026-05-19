@@ -1,58 +1,10 @@
-import * as crypto from "node:crypto";
-import * as jwt from "jsonwebtoken";
-
-import {
-  ConflictError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../common/errors";
-import {
-  LoginUserDto,
-  RegisterUserDto,
-  UpdatePasswordDto,
-  UpdateProfileDto,
-} from "../common/dtos/user.dto";
-import {
-  UserRepository,
-  userRepository,
-} from "../repositories/user.repository";
-
-const JWT_SECRET = process.env["JWT_SECRET"];
-if (!JWT_SECRET) throw new Error("JWT_SECRET env var is required");
+import { ConflictError, NotFoundError, UnauthorizedError } from "../common/errors";
+import { UpdatePasswordDto, UpdateProfileDto } from "../common/dtos/user.dto";
+import { UserRepository, userRepository } from "../repositories/user.repository";
+import { createHash, compareHash } from "../common/utils/hash"; 
 
 export class UserService {
-  constructor(private readonly repository: UserRepository) {
-    this.repository = userRepository;
-  }
-
-  async register(body: unknown) {
-    const data = RegisterUserDto.parse(body);
-
-    const existing = await this.repository.findByEmail(data.email);
-    if (existing) throw new ConflictError("Email already in use");
-
-    return this.repository.create({
-      ...(data.name !== undefined && { name: data.name }),
-      email: data.email,
-      passwordHash: this.hashPassword(data.password),
-    });
-  }
-
-  async login(body: unknown) {
-    const data = LoginUserDto.parse(body);
-
-    const user = await this.repository.findByEmail(data.email);
-    const valid = user?.password === this.hashPassword(data.password);
-
-    if (!user || !valid) throw new UnauthorizedError("Invalid credentials");
-
-    const roles = user.userRoles.map((ur) => ur.role.name);
-    const token = jwt.sign({ sub: user.id, roles }, JWT_SECRET!, {
-      expiresIn: "7d",
-    });
-
-    return { token };
-  }
+  constructor(private readonly repository: UserRepository) {}
 
   async getMe(id: number) {
     const user = await this.repository.findById(id);
@@ -60,7 +12,7 @@ export class UserService {
     return user;
   }
 
-  async updateProfile(id: number, body: unknown) {
+  async updateProfile(id: number, body: UpdateProfileDto) {
     const data = UpdateProfileDto.parse(body);
 
     if (data.email) {
@@ -72,20 +24,17 @@ export class UserService {
     return this.repository.update(id, data);
   }
 
-  async updatePassword(id: number, body: unknown) {
+  async updatePassword(id: number, body: UpdatePasswordDto) {
     const data = UpdatePasswordDto.parse(body);
 
-    const me = await this.repository.findById(id);
-    const user = me ? await this.repository.findByEmail(me.email) : null;
+    const user = await this.repository.findById(id);
+    if (!user) throw new NotFoundError("User not found");
 
-    if (!user || user.password !== this.hashPassword(data.currentPassword)) {
-      throw new UnauthorizedError("Current password is incorrect");
-    }
+    const validPassword = await compareHash(data.currentPassword, user.password || "");
+    if (!validPassword) throw new UnauthorizedError("Current password is incorrect");
 
-    await this.repository.updatePassword(
-      id,
-      this.hashPassword(data.newPassword),
-    );
+    const hash = await createHash(data.newPassword);
+    await this.repository.updatePassword(id, hash);
   }
 
   async listAll() {
@@ -98,9 +47,6 @@ export class UserService {
     await this.repository.delete(id);
   }
 
-  private hashPassword(password: string): string {
-    return crypto.createHash("sha256").update(password).digest("hex");
-  }
 }
 
 export const userService = new UserService(userRepository);
