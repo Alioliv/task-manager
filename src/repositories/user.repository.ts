@@ -1,6 +1,13 @@
 import type { PrismaClient } from "../prisma/generated/prisma/client"
 import { prisma } from "../prisma/prisma"
 import type { UpdateProfileDto } from "../common/dtos/user.dto"
+import type { Prisma } from "../prisma/generated/prisma/client"
+
+const userSelect = {
+  id: true,
+  name: true,
+  email: true,
+} satisfies Prisma.UserSelect
 
 export class UserRepository {
   constructor(private readonly prisma: PrismaClient) {
