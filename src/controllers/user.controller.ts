@@ -1,44 +1,60 @@
-import type { Request, Response } from "express"
+import type { NextFunction, Request, Response } from "express"
 import { UserService, userService } from "../services/user.service"
+import type { UpdatePasswordDto, UpdateProfileDto } from "../common/dtos/user.dto"
 
 class UserController {
-  constructor(private readonly service: UserService) {
-    this.service = userService
+  constructor(private readonly service: UserService) {}
+
+  async getMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idUser = Number(req.params.id)
+      const dataUser = await this.service.getMe(idUser)
+      return res.status(200).json({
+        message: "Usuário encontrado!",
+        data: dataUser
+      })
+    } catch (error) { next(error) }
   }
 
-  async register(req: Request, res: Response) {
-    const user = await this.service.register(req.body)
-    res.status(201).json(user)
+  async updateProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idUser = Number(req.params.id)
+      const dataToUpdate = req.body as UpdateProfileDto
+      const updatedUser = await this.service.updateProfile(idUser, dataToUpdate)
+      return res.status(200).json({
+        message: 'Usuário atualizado!',
+        data: updatedUser
+      });
+    } catch (error) { next(error) }
   }
 
-  async login(req: Request, res: Response) {
-    const result = await this.service.login(req.body)
-    res.json(result)
+  async updatePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idUser = Number(req.params.id)
+      const passwordToUpdate = req.body as UpdatePasswordDto
+      await this.service.updatePassword(idUser, passwordToUpdate)
+      return res.status(204).send()
+    } catch (error) { next(error) }
   }
 
-  async getMe(req: Request, res: Response) {
-    const user = await this.service.getMe(req.user!.sub)
-    res.json(user)
+  async listAll(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const users = await this.service.listAll();
+      return res.status(200).json({
+        message: 'Usuários encontrados',
+        data: users
+      })
+    } catch (error) { next(error) }
   }
 
-  async updateProfile(req: Request, res: Response) {
-    const user = await this.service.updateProfile(req.user!.sub, req.body)
-    res.json(user)
-  }
-
-  async updatePassword(req: Request, res: Response) {
-    await this.service.updatePassword(req.user!.sub, req.body)
-    res.status(204).send()
-  }
-
-  async listAll(_req: Request, res: Response) {
-    const users = await this.service.listAll()
-    res.json(users)
-  }
-
-  async deleteUser(req: Request, res: Response) {
-    await this.service.deleteUser(Number(req.params["id"]))
-    res.status(204).send()
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const idUser = Number(req.params.id)
+      const userDeleted = await this.service.deleteUser(idUser)
+      return res.status(200).json({
+        message: "Usuário deletado com sucesso",
+      })
+    } catch (error) { next(error) }
   }
 }
 
