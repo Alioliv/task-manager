@@ -32,11 +32,8 @@ class UserController {
     try {
       const idUser = Number(req.params.id)
       const passwordToUpdate = req.body as UpdatePasswordDto
-      const updatedPassword = await this.service.updatePassword(idUser, passwordToUpdate)
-      return res.status(200).json({
-        message: "Senha atualizada!",
-        data: updatedPassword
-      })
+      await this.service.updatePassword(idUser, passwordToUpdate)
+      return res.status(204).send()
     } catch (error) { next(error) }
   }
 
