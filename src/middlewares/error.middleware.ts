@@ -11,7 +11,7 @@ export function errorHandler(
   if (err instanceof ZodError) {
     res.status(422).json({
       error: "Validation error",
-      details: err.flatten,
+      details: err.flatten(),
     });
     return;
   }
