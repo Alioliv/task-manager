@@ -28,7 +28,7 @@ export class UserRepository {
   }
 
   async findAll() {
-    return this.prisma.user.findMany({})
+    return this.prisma.user.findMany({select: userSelect})
   }
 
   async update(id: number, data: UpdateProfileDto) {
