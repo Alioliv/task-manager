@@ -3,9 +3,7 @@ import { UserService, userService } from "../services/user.service"
 import type { UpdatePasswordDto, UpdateProfileDto } from "../common/dtos/user.dto"
 
 class UserController {
-  constructor(private readonly service: UserService) {
-    this.service = userService
-  }
+  constructor(private readonly service: UserService) {}
 
   async getMe(req: Request, res: Response, next: NextFunction) {
     try {
