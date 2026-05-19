@@ -12,58 +12,6 @@ datasource db {
   provider = "postgresql"
 }
 
-// ====== TABELA DE USUARIOS ======
-
-enum RoleType {
-  ADMIN
-  MEMBER
-}
-
-model User {
-  id        Int        @id @default(autoincrement())
-  name      String?
-  email     String     @unique
-  password  String?
-  createdAt DateTime   @default(now())
-  userRoles UserRole[]
-  tokens    Token[]
-}
-
-model Role {
-  id        Int        @id @default(autoincrement())
-  name      RoleType   @unique
-  userRoles UserRole[]
-}
-
-model UserRole {
-  userId Int
-  roleId Int
-  user   User @relation(fields: [userId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
-
-  @@id([userId, roleId])
-}
-
-// ====== TABELA DE TOKEN ======
-
-model Token {
-  id        Int       @id @default(autoincrement())
-  token     String    @db.VarChar(255)
-  type      TypeToken @default(ACCESS)
-  revoked   Boolean   @default(false)
-  expiresAt DateTime
-  userId    Int
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("token")
-}
-
-enum TypeToken {
-  ACCESS
-  REFRESH
-}
-
 // ====== TABELA DE TAREFAS ======
 
 enum Priority {
@@ -103,7 +51,7 @@ model History {
   eventType EventType
   createdAt DateTime  @default(now())
 
-  task      Task      @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
 }
 
 enum EventType {
