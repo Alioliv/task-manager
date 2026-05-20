@@ -9,7 +9,7 @@ export const tasksController = {
       const { title, description, dueDate, priority } = req.body
       const createdById = req.user!.id
 
-      const task = await tasksService.create({
+      const task = await HistoryService.create({
         title,
         description,
         ...(dueDate && { dueDate: new Date(dueDate) }),
