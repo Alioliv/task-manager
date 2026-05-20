@@ -23,8 +23,8 @@ export const CreateProjectDto = z.object({
   title: z.string().min(1, 'Título é obrigatório').max(100),
   description: z.string().max(500).optional(),
   knowledgeArea: KnowledgeAreaEnum,
-  startDate: z.iso.datetime().optional(),
-  endDate: z.iso.datetime().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
   status: ProjectStatusEnum.optional(),
   ownerId: z.number().int().positive(),
 })
