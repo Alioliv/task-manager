@@ -5,7 +5,11 @@ export const historyRepository = {
   async create(taskId: string, eventType: EventType) {
     return await prisma.history.create({
       data: { taskId, eventType }
-    })
+async create(taskId: string, eventType: EventType, userId?: number) {
+  return await prisma.history.create({
+    data: { taskId, eventType, userId }
+  })
+}
   },
 
   async findByTaskId(taskId: string) {
