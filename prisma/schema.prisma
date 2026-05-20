@@ -25,9 +25,11 @@ model User {
   email         String     @unique
   password      String?
   createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   userRoles     UserRole[]
   tokens        Token[]
   histories     History[]
+  projects      Project[]
   createdTasks  Task[]     @relation("TaskCreator")
   assignedTasks Task[]     @relation("TaskAssignees")
 }
@@ -100,13 +102,14 @@ model Task {
 // ====== TABELA DE HISTÓRICO ======
 
 model History {
-  id        String    @id @default(uuid())
-  taskId    String
-  userId    Int?
-  eventType EventType
-  createdAt DateTime  @default(now())
+  id          String    @id @default(uuid())
+  taskId      String
+  userId      Int?
+  eventType   EventType
+  description String?
+  createdAt   DateTime  @default(now())
 
-  task Task  @relation(fields: [taskId], references: [id])
+  task Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User? @relation(fields: [userId], references: [id])
 }
 
