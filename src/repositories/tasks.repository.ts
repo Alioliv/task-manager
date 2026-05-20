@@ -1,7 +1,6 @@
 import { prisma } from "../prisma/prisma"
 import { Priority, Status } from "../prisma/generated/prisma/client"
 
-// === Criação de tarefa === 
 export interface CreateTaskDTO {
   title: string
   description?: string
@@ -16,6 +15,12 @@ export const tasksRepository = {
         ...data,
         status: Status.PENDENTE
       }
+    })
+  },
+
+  async findById(id: string) {
+    return await prisma.task.findUnique({
+      where: { id }
     })
   }
 }
