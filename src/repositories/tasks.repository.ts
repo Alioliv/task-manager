@@ -7,6 +7,7 @@ export interface CreateTaskDTO {
   dueDate?: Date
   priority: Priority
   createdById: number
+  projectId?: string
 }
 
 export interface FindManyTasksDTO {

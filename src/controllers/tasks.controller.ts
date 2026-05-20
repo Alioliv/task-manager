@@ -6,7 +6,7 @@ import { tasksRepository } from "../repositories/tasks.repository"
 export const tasksController = {
   async create(req: Request, res: Response) {
     try {
-      const { title, description, dueDate, priority } = req.body
+      const { title, description, dueDate, priority, projectId } = req.body
       const createdById = req.user!.id
 
       const task = await tasksService.create({
@@ -14,7 +14,8 @@ export const tasksController = {
         description,
         ...(dueDate && { dueDate: new Date(dueDate) }),
         priority,
-        createdById
+        createdById,
+        ...(projectId && { projectId })
       })
 
       return res.status(201).json(task)
@@ -27,12 +28,35 @@ export const tasksController = {
     try {
       const { id } = req.params as { id: string }
       const { userIds } = req.body
+      const userId = req.user!.id
 
-      const task = await tasksService.addAssignees(id, userIds)
+      const task = await tasksService.addAssignees(id, userIds, userId)
       return res.status(200).json(task)
     } catch (error: any) {
       const isNotFound = error.message?.includes("não encontrada") || error.message?.includes("não encontrados")
       return res.status(isNotFound ? 404 : 500).json({ message: error.message ?? "Erro ao atribuir usuários" })
+    }
+  },
+
+  async findMany(req: Request, res: Response) {
+    try {
+      const { projectId } = req.params as { projectId: string }
+      const userId = req.user!.id
+      const isAdmin = req.user!.role.includes("ADMIN")
+      const page = Number(req.query["page"]) || 1
+      const limit = Number(req.query["limit"]) || 10
+
+      const result = await tasksService.findMany({
+        projectId,
+        userId,
+        isAdmin,
+        page,
+        limit
+      })
+
+      return res.status(200).json(result)
+    } catch (error) {
+      return res.status(500).json({ message: "Erro ao listar tarefas" })
     }
   },
 

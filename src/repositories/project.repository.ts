@@ -1,5 +1,4 @@
 import type { PrismaClient } from '../prisma/generated/prisma/client'
-import { prisma } from '../prisma/prisma'
 import type { CreateProjectDto, UpdateProjectDto } from '../common/dtos/project.dto'
 
 export class ProjectRepository {
@@ -59,4 +58,5 @@ export class ProjectRepository {
   }
 }
 
+import { prisma } from '../prisma/prisma'
 export const projectRepository = new ProjectRepository(prisma)
