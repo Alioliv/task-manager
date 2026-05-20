@@ -11,7 +11,7 @@ export const historyRepository = {
   async findByTaskId(taskId: string) {
     return await prisma.history.findMany({
       where: { taskId },
-      orderBy: { createdAt: "asc" }
+      orderBy: { createdAt: "desc" }
     })
   }
 }
