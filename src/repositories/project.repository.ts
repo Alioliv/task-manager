@@ -26,16 +26,19 @@ export class ProjectRepository {
     })
   }
 
-  async create(data: CreateProjectDto) {
-    const createData = {
-      title: data.title,
-      description: data.description ?? null,
-      knowledgeArea: data.knowledgeArea,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      endDate: data.endDate ? new Date(data.endDate) : null,
-      status: data.status ?? 'PLANEJAMENTO',
-      ownerId: data.ownerId,
-    }
+  async create(data: CreateProjectDto & { ownerId: number }) {
+    return this.prisma.project.create({
+      data: {
+        title: data.title,
+        description: data.description ?? null,
+        knowledgeArea: data.knowledgeArea,
+        startDate: data.startDate ? new Date(data.startDate) : null,
+        endDate: data.endDate ? new Date(data.endDate) : null,
+        status: data.status ?? 'PLANEJAMENTO',
+        ownerId: data.ownerId,
+      }
+    })
+  }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.prisma.project.create({ data: createData as any })
