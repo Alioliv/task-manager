@@ -63,11 +63,21 @@ export const tasksController = {
   async getHistory(req: Request, res: Response) {
     try {
       const { id } = req.params as { id: string }
+
       const task = await tasksRepository.findById(id)
       if (!task) {
         return res.status(404).json({ message: "Tarefa não encontrada" })
       }
-      const history = await HistoryService.findByTaskId(id)
+
+      const requesterId = req.user!.id
+      const isAdmin = req.user!.role.includes("ADMIN")
+
+      const history = await HistoryService.findByTaskId({
+        taskId: id,
+        requesterId,
+        isAdmin
+      })
+
       return res.status(200).json(history)
     } catch (error) {
       return res.status(500).json({ message: "Erro ao buscar histórico" })
