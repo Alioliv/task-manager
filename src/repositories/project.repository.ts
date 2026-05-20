@@ -1,9 +1,9 @@
 import type { PrismaClient } from '../prisma/generated/prisma/client'
 import { prisma } from '../prisma/prisma'
-import type { CreateProjectDto,UpdateProjectDto } from '../common/dtos/project.dto'
+import type { CreateProjectDto, UpdateProjectDto } from '../common/dtos/project.dto'
 
 export class ProjectRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async findAll() {
     return this.prisma.project.findMany({
@@ -28,32 +28,28 @@ export class ProjectRepository {
     return this.prisma.project.create({
       data: {
         title: data.title,
-        description: data.description ?? null,
+        ...(data.description !== undefined && { description: data.description }),
         knowledgeArea: data.knowledgeArea,
-        startDate: data.startDate ? new Date(data.startDate) : null,
-        endDate: data.endDate ? new Date(data.endDate) : null,
+        ...(data.startDate !== undefined && { startDate: new Date(data.startDate) }),
+        ...(data.endDate !== undefined && { endDate: new Date(data.endDate) }),
         status: data.status ?? 'PLANEJAMENTO',
         ownerId: data.ownerId,
       }
     })
   }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.prisma.project.create({ data: createData as any })
-  }
-
   async update(id: string, data: UpdateProjectDto) {
-    const updateData = {
-      title: data.title,
-      description: data.description ?? null,
-      knowledgeArea: data.knowledgeArea,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      endDate: data.endDate ? new Date(data.endDate) : null,
-      status: data.status,
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.prisma.project.update({ where: { id }, data: updateData as any })
+    return this.prisma.project.update({
+      where: { id },
+      data: {
+        ...(data.title !== undefined && { title: data.title }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.knowledgeArea !== undefined && { knowledgeArea: data.knowledgeArea }),
+        ...(data.startDate !== undefined && { startDate: new Date(data.startDate) }),
+        ...(data.endDate !== undefined && { endDate: new Date(data.endDate) }),
+        ...(data.status !== undefined && { status: data.status }),
+      }
+    })
   }
 
   async delete(id: string) {

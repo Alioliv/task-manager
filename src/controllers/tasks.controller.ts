@@ -9,7 +9,7 @@ export const tasksController = {
       const { title, description, dueDate, priority } = req.body
       const createdById = req.user!.id
 
-      const task = await HistoryService.create({
+      const task = await tasksService.create({
         title,
         description,
         ...(dueDate && { dueDate: new Date(dueDate) }),
@@ -20,6 +20,19 @@ export const tasksController = {
       return res.status(201).json(task)
     } catch (error) {
       return res.status(500).json({ message: "Erro ao criar tarefa" })
+    }
+  },
+
+  async addAssignees(req: Request, res: Response) {
+    try {
+      const { id } = req.params as { id: string }
+      const { userIds } = req.body
+
+      const task = await tasksService.addAssignees(id, userIds)
+      return res.status(200).json(task)
+    } catch (error: any) {
+      const isNotFound = error.message?.includes("não encontrada") || error.message?.includes("não encontrados")
+      return res.status(isNotFound ? 404 : 500).json({ message: error.message ?? "Erro ao atribuir usuários" })
     }
   },
 
