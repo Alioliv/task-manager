@@ -8,9 +8,10 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// ====== TABELA DE USUARIOS ======
+// ====== TABELA DE USUÁRIOS ======
 
 enum RoleType {
   ADMIN
@@ -27,6 +28,7 @@ model User {
   userRoles     UserRole[]
   tokens        Token[]
   histories     History[]
+  projects      Project[]
   createdTasks  Task[]     @relation("TaskCreator")
   assignedTasks Task[]     @relation("TaskAssignees")
 }
@@ -40,8 +42,8 @@ model Role {
 model UserRole {
   userId Int
   roleId Int
-  user   User @relation(fields: [userId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
 }
@@ -54,11 +56,12 @@ model Token {
   type      TypeToken @default(ACCESS)
   revoked   Boolean   @default(false)
   expiresAt DateTime
+  createdAt DateTime  @default(now())
   userId    Int
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("token")
+  @@map("tokens")
 }
 
 enum TypeToken {
@@ -89,8 +92,10 @@ model Task {
   status      Status    @default(PENDENTE)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  projectId   String?
   history     History[]
 
+  project   Project? @relation(fields: [projectId], references: [id])
   createdById Int
   createdBy   User   @relation("TaskCreator", fields: [createdById], references: [id])
   assignees   User[] @relation("TaskAssignees")
@@ -116,4 +121,38 @@ enum EventType {
   UPDATED
   COMPLETED
   REOPENED
+}
+
+// ====== TABELA DE PROJETOS ======
+
+enum KnowledgeArea {
+  TECNOLOGIA
+  SAUDE
+  EDUCACAO
+  FINANCAS
+  MARKETING
+  OUTRO
+}
+
+enum ProjectStatus {
+  PLANEJAMENTO
+  EM_ANDAMENTO
+  CONCLUIDO
+  CANCELADO
+}
+
+model Project {
+  id            String        @id @default(uuid())
+  title         String
+  description   String?
+  knowledgeArea KnowledgeArea
+  startDate     DateTime?
+  endDate       DateTime?
+  status        ProjectStatus @default(PLANEJAMENTO)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  ownerId       Int
+
+  owner User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tasks Task[]
 }
