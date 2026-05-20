@@ -51,5 +51,34 @@ export const tasksRepository = {
     ])
 
     return { tasks, total, page, limit }
+  },
+
+  async addAssignees(taskId: string, userIds: number[]) {
+    return await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        assignees: {
+          connect: userIds.map(id => ({ id }))
+        }
+      },
+      include: {
+        assignees: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            createdAt: true
+          }
+        }
+      }
+    })
+  },
+
+  async validateUserIds(userIds: number[]) {
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true }
+    })
+    return users.map(u => u.id)
   }
 }
