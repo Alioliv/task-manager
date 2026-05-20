@@ -10,7 +10,7 @@ export interface CreateTaskDTO {
 }
 
 export interface FindManyTasksDTO {
-  projectId: number
+  projectId: string
   userId?: number
   isAdmin: boolean
   page: number
