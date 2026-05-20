@@ -8,5 +8,9 @@ export const HistoryService = {
     const task = await tasksRepository.create(data)
     await historyRepository.create(task.id, EventType.CREATED)
     return task
+  },
+
+  async findByTaskId(taskId: string) {
+    return await historyRepository.findByTaskId(taskId)
   }
 }
