@@ -44,8 +44,8 @@ export const UpdateProjectDto = z.object({
   title: z.string().min(1, 'Título não pode ser vazio').max(100).optional(),
   description: z.string().max(500).optional(),
   knowledgeArea: KnowledgeAreaEnum.optional(),
-  startDate: z.iso.datetime().optional(),
-  endDate: z.iso.datetime().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
   status: ProjectStatusEnum.optional(),
 })
 .refine((d) => {
