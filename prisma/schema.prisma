@@ -20,14 +20,16 @@ enum RoleType {
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  name      String?
-  email     String     @unique
-  password  String?
-  createdAt DateTime   @default(now())
-  userRoles UserRole[]
-  tokens    Token[]
-  histories History[]
+  id            Int        @id @default(autoincrement())
+  name          String?
+  email         String     @unique
+  password      String?
+  createdAt     DateTime   @default(now())
+  userRoles     UserRole[]
+  tokens        Token[]
+  histories     History[]
+  createdTasks  Task[]     @relation("TaskCreator")
+  assignedTasks Task[]     @relation("TaskAssignees")
 }
 
 model Role {
@@ -90,10 +92,9 @@ model Task {
   updatedAt   DateTime  @updatedAt
   history     History[]
 
-  // TODO: Quando branch de usuários for mergeada no develop arrumar a relação aqui
-  // createdById String
-  // createdBy   User   @relation("TaskCreator", fields: [createdById], references: [id])
-  // assignees   User[] @relation("TaskAssignees")
+  createdById Int
+  createdBy   User   @relation("TaskCreator", fields: [createdById], references: [id])
+  assignees   User[] @relation("TaskAssignees")
 }
 
 // ====== TABELA DE HISTÓRICO ======
