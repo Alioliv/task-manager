@@ -10,7 +10,7 @@ export interface CreateTaskDTO {
 }
 
 export interface FindManyTasksDTO {
-  projectId: number
+  projectId: string
   userId?: number
   isAdmin: boolean
   page: number
@@ -20,10 +20,13 @@ export interface FindManyTasksDTO {
 export const tasksRepository = {
   async create(data: CreateTaskDTO) {
     return await prisma.task.create({
-      data: {
-        ...data,
-        status: Status.PENDENTE
-      }
+      data: { ...data, status: Status.PENDENTE }
+    })
+  },
+
+  async findById(id: string) {
+    return await prisma.task.findUnique({
+      where: { id }
     })
   },
 
@@ -33,9 +36,7 @@ export const tasksRepository = {
     const where = {
       projectId,
       ...(!isAdmin && userId ? {
-        assignees: {
-          some: { id: userId }
-        }
+        assignees: { some: { id: userId } }
       } : {})
     }
 
