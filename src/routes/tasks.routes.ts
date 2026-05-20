@@ -1,8 +1,10 @@
 import { Router } from "express"
 import { tasksController } from "../controllers/tasks.controller"
+import { authenticate, authorize } from "../middlewares/auth.middleware"
 
 const router = Router({ mergeParams: true })
 
-router.post("/", tasksController.create)
+router.post("/", authenticate, tasksController.create)
+router.get("/:id/history", authenticate, authorize("ADMIN", "MEMBER"), tasksController.getHistory)
 
 export default router
