@@ -12,10 +12,15 @@ async create(taskId: string, eventType: EventType, userId?: number) {
 }
   },
 
-  async findByTaskId(taskId: string) {
-    return await prisma.history.findMany({
-      where: { taskId },
-      orderBy: { createdAt: "desc" }
-    })
-  }
+async findByTaskId(taskId: string) {
+  return await prisma.history.findMany({
+    where: { taskId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true }
+      }
+    }
+  })
+}
 }
