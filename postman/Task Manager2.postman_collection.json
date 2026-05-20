@@ -1,0 +1,366 @@
+{
+  "info": {
+    "_postman_id": "2d312586-1817-4ff5-8901-75423d6a02b9",
+    "name": "Task Manager",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50145759"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Emilie\",\n  \"email\": \"emilie@email.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) pm.collectionVariables.set('token', res.accessToken);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"emilie@email.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin\",\n  \"email\": \"admin@email.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register/admin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register",
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Emilie Rodrigues\",\n  \"email\": \"emilie@email.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"123456\",\n  \"newPassword\": \"654321\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/me/password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJlbWlsaWVAZW1haWwuY29tIiwibmFtZSI6IkVtaWxpZSIsInJvbGUiOlsiTUVNQkVSIl0sImlhdCI6MTc3OTMwNzI2NiwiZXhwIjoxNzc5MzEwODY2fQ._K7HGpNwd0pStn0njSwPy2HubIpnHuFBZ61EznRtZ3M"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tarefa com projeto2\",\n  \"description\": \"Testando associação2\",\n  \"dueDate\": \"2026-06-01T00:00:00.000Z\",\n  \"priority\": \"ALTA\",\n  \"projectId\": \"projeto-teste-1\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/1/tasks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "1",
+                "tasks"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Add signatário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJlbWlsaWVAZW1haWwuY29tIiwibmFtZSI6IkVtaWxpZSIsInJvbGUiOlsiTUVNQkVSIl0sImlhdCI6MTc3OTMwNzI2NiwiZXhwIjoxNzc5MzEwODY2fQ._K7HGpNwd0pStn0njSwPy2HubIpnHuFBZ61EznRtZ3M",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userIds\": [2]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/1/tasks/303d612f-36d9-4768-9fea-d98e301f4d90/assignees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "projects",
+                "1",
+                "tasks",
+                "303d612f-36d9-4768-9fea-d98e301f4d90",
+                "assignees"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJlbWlsaWVAZW1haWwuY29tIiwibmFtZSI6IkVtaWxpZSIsInJvbGUiOlsiTUVNQkVSIl0sImlhdCI6MTc3OTMwNzI2NiwiZXhwIjoxNzc5MzEwODY2fQ._K7HGpNwd0pStn0njSwPy2HubIpnHuFBZ61EznRtZ3M",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/projects/projeto-teste-1/tasks",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "projects",
+                "projeto-teste-1",
+                "tasks"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
