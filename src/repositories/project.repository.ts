@@ -3,9 +3,7 @@ import { prisma } from '../prisma/prisma'
 import type { CreateProjectDto,UpdateProjectDto } from '../common/dtos/project.dto'
 
 export class ProjectRepository {
-  constructor(private readonly prisma: PrismaClient) {
-    this.prisma = prisma
-  }
+  constructor(private readonly prisma: PrismaClient) {}
 
   async findAll() {
     return this.prisma.project.findMany({
