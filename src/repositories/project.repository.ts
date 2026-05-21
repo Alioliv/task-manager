@@ -10,10 +10,8 @@ export class ProjectRepository {
     })
   }
 
-  async findById(id: string) {
-    return this.prisma.project.findUnique({
-      where: { id },
-    })
+  async findById(id: number) {
+    return this.prisma.project.findUnique({ where: { id } })
   }
 
   async findByOwnerId(ownerId: number) {
@@ -37,7 +35,7 @@ export class ProjectRepository {
     })
   }
 
-  async update(id: string, data: UpdateProjectDto) {
+  async update(id: number, data: UpdateProjectDto) {
     return this.prisma.project.update({
       where: { id },
       data: {
@@ -51,9 +49,9 @@ export class ProjectRepository {
     })
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     return this.prisma.project.delete({
-      where: { id },
+      where: { id }
     })
   }
 }

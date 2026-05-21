@@ -9,7 +9,7 @@ export class ProjectService {
     return this.repository.findAll()
   }
 
-  async getById(id: string) {
+  async getById(id: number) {
     const project = await this.repository.findById(id)
 
     if (!project) {
@@ -27,7 +27,7 @@ export class ProjectService {
     return this.repository.create(data)
   }
 
-  async update(id: string, data: UpdateProjectDto, requesterId: number, isAdmin: boolean) {
+  async update(id: number, data: UpdateProjectDto, requesterId: number, isAdmin: boolean) {
     const project = await this.getById(id)
 
     if (!isAdmin && project.ownerId !== requesterId) {
@@ -37,7 +37,7 @@ export class ProjectService {
     return this.repository.update(id, data)
   }
 
-  async delete(id: string, requesterId: number, isAdmin: boolean) {
+  async delete(id: number, requesterId: number, isAdmin: boolean) {
     const project = await this.getById(id)
 
     if (!isAdmin && project.ownerId !== requesterId) {

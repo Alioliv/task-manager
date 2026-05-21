@@ -31,7 +31,7 @@ export const tasksService = {
     const task = await tasksRepository.findById(taskId)
     if (!task) throw new Error("Tarefa não encontrada")
 
-    const isAssigned = task.assignees.some(a => a.id === userId)
+    const isAssigned = task.assignees.some(a => a.id === userId) ?? false
     if (!isAdmin && !isAssigned) throw new Error("Sem permissão para editar esta tarefa")
 
     if (data.status === Status.CONCLUIDA && task.status === Status.CONCLUIDA) {
@@ -60,7 +60,7 @@ export const tasksService = {
 
     if (task.status === Status.CONCLUIDA) throw new Error("Tarefa já está concluída")
 
-    const isAssigned = task.assignees.some(a => a.id === userId)
+    const isAssigned = task.assignees.some(a => a.id === userId) ?? false
     if (!isAdmin && !isAssigned) throw new Error("Sem permissão para concluir esta tarefa")
 
     const updated = await tasksRepository.complete(taskId)
@@ -74,7 +74,7 @@ export const tasksService = {
 
     if (task.status !== Status.CONCLUIDA) throw new Error("Apenas tarefas concluídas podem ser reabertas")
 
-    const isAssigned = task.assignees.some(a => a.id === userId)
+    const isAssigned = task.assignees.some(a => a.id === userId) ?? false
     if (!isAdmin && !isAssigned) throw new Error("Sem permissão para reabrir esta tarefa")
 
     const updated = await tasksRepository.reopen(taskId)

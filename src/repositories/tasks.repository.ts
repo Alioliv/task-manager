@@ -72,7 +72,7 @@ export const tasksRepository = {
   async addAssignees(taskId: number, userIds: number[]) {
     return await prisma.task.update({
       where: { id: taskId },
-      data: { assignees: { connect: userIds.map(id => ({ id })) } },
+        data: { assignees: { connect: userIds.map(id => ({ id: Number(id) })) } },
       include: {
         assignees: { select: { id: true, name: true, email: true, createdAt: true } }
       }

@@ -20,7 +20,7 @@ class ProjectController {
 
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = getParam(req.params['id'])
+      const id = Number(getParam(req.params['id']))
       const project = await this.service.getById(id)
       return res.status(200).json({
         message: 'Projeto encontrado',
@@ -57,7 +57,7 @@ class ProjectController {
     console.log(req.params)
     console.log(req.user)
 
-    const id = getParam(req.params['id'])
+    const id = Number(getParam(req.params['id']))
     const data = UpdateProjectDto.parse(req.body)
 
     const requesterId = req.user!.id
@@ -82,7 +82,7 @@ class ProjectController {
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const id = getParam(req.params['id'])
+      const id = Number(getParam(req.params['id']))
       const requesterId = req.user!.id
       const isAdmin = req.user!.role.includes('ADMIN')
       await this.service.delete(id, requesterId, isAdmin)

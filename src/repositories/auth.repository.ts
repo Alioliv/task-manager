@@ -41,7 +41,7 @@ export class AuthRepository {
     });
   }
 
-  async createToken(dataToken: Omit<Token, "id" | "revoked">) {
+  async createToken(dataToken: Omit<Token, "id" | "revoked" | "createdAt">) {
     return await this.prisma.token.create({
       data: dataToken,
     });

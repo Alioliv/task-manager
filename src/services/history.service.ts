@@ -1,6 +1,6 @@
 import { tasksRepository } from "../repositories/tasks.repository"
 import { historyRepository } from "../repositories/history.repository"
-import { EventType } from "../prisma/generated/prisma"
+import { EventType } from "../prisma/generated/prisma/client"
 import type { CreateTaskDTO } from "../repositories/tasks.repository"
 
 interface FindByTaskIdOptions {
