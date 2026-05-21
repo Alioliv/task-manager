@@ -16,9 +16,7 @@ export const tasksService = {
 
     const foundIds = await tasksRepository.validateUserIds(userIds)
     const notFound = userIds.filter(id => !foundIds.includes(id))
-    if (notFound.length > 0) {
-      throw new Error(`Usuários não encontrados: ${notFound.join(", ")}`)
-    }
+    if (notFound.length > 0) throw new Error(`Usuários não encontrados: ${notFound.join(", ")}`)
 
     const updated = await tasksRepository.addAssignees(taskId, userIds)
     await historyRepository.create(taskId, EventType.ASSIGNED, userId)
@@ -34,9 +32,7 @@ export const tasksService = {
     if (!task) throw new Error("Tarefa não encontrada")
 
     const isAssigned = task.assignees.some(a => a.id === userId)
-    if (!isAdmin && !isAssigned) {
-      throw new Error("Sem permissão para editar esta tarefa")
-    }
+    if (!isAdmin && !isAssigned) throw new Error("Sem permissão para editar esta tarefa")
 
     const updated = await tasksRepository.update(taskId, data)
     await historyRepository.create(taskId, EventType.UPDATED, userId)
@@ -47,17 +43,27 @@ export const tasksService = {
     const task = await tasksRepository.findById(taskId)
     if (!task) throw new Error("Tarefa não encontrada")
 
-    if (task.status === Status.CONCLUIDA) {
-      throw new Error("Tarefa já está concluída")
-    }
+    if (task.status === Status.CONCLUIDA) throw new Error("Tarefa já está concluída")
 
     const isAssigned = task.assignees.some(a => a.id === userId)
-    if (!isAdmin && !isAssigned) {
-      throw new Error("Sem permissão para concluir esta tarefa")
-    }
+    if (!isAdmin && !isAssigned) throw new Error("Sem permissão para concluir esta tarefa")
 
     const updated = await tasksRepository.complete(taskId)
     await historyRepository.create(taskId, EventType.COMPLETED, userId)
+    return updated
+  },
+
+  async reopen(taskId: number, userId: number, isAdmin: boolean) {
+    const task = await tasksRepository.findById(taskId)
+    if (!task) throw new Error("Tarefa não encontrada")
+
+    if (task.status !== Status.CONCLUIDA) throw new Error("Apenas tarefas concluídas podem ser reabertas")
+
+    const isAssigned = task.assignees.some(a => a.id === userId)
+    if (!isAdmin && !isAssigned) throw new Error("Sem permissão para reabrir esta tarefa")
+
+    const updated = await tasksRepository.reopen(taskId)
+    await historyRepository.create(taskId, EventType.REOPENED, userId)
     return updated
   }
 }

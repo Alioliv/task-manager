@@ -4,7 +4,7 @@ import { EventType } from "../prisma/generated/prisma"
 import type { CreateTaskDTO } from "../repositories/tasks.repository"
 
 interface FindByTaskIdOptions {
-  taskId: string
+  taskId: number
   requesterId: number
   isAdmin: boolean
 }
@@ -20,9 +20,6 @@ export const HistoryService = {
     const task = await tasksRepository.findById(taskId)
     if (!task) throw new Error("Tarefa não encontrada")
 
-    if (isAdmin) {
-      return await historyRepository.findByTaskId(taskId)
-    }
     if (isAdmin) {
       return await historyRepository.findByTaskId(taskId)
     }

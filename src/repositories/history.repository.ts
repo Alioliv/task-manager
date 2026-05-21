@@ -18,24 +18,12 @@ export const historyRepository = {
     })
   },
 
-  async findByTaskIdAndUser(taskId: string, userId: number) {
+  async findByTaskIdAndUser(taskId: number, userId: number) {
     return await prisma.history.findMany({
       where: { taskId, userId },
       orderBy: { createdAt: "desc" },
       include: {
         user: { select: { id: true, name: true, email: true } }
-      }
-    })
-  },
-
-  async findByTaskIdAndUser(taskId: string, userId: number) {
-    return await prisma.history.findMany({
-      where: { taskId, userId },
-      orderBy: { createdAt: "desc" },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true }
-        }
       }
     })
   }

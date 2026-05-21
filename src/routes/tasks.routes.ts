@@ -10,5 +10,6 @@ router.get("/", authenticate, tasksController.findMany)
 router.get("/:id/history", authenticate, tasksController.getHistory)
 router.patch("/:id", authenticate, tasksController.update)
 router.patch("/:id/complete", authenticate, tasksController.complete)
+router.patch("/:id/reopen", authenticate, tasksController.reopen)
 
 export default router

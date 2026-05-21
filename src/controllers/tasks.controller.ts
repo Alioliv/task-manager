@@ -2,7 +2,7 @@ import type { Request, Response } from "express"
 import { HistoryService } from "../services/history.service"
 import { tasksService } from "../services/tasks.service"
 import { tasksRepository } from "../repositories/tasks.repository"
-import { Status } from "../prisma/generated/prisma/client"
+import { Priority, Status } from "../prisma/generated/prisma/client"
 
 export const tasksController = {
   async create(req: Request, res: Response) {
@@ -10,7 +10,8 @@ export const tasksController = {
       const { title, description, dueDate, priority, projectId } = req.body
       const createdById = req.user!.id
       const task = await tasksService.create({
-        title, description,
+        title,
+        description,
         ...(dueDate && { dueDate: new Date(dueDate) }),
         priority,
         createdById,
@@ -38,9 +39,6 @@ export const tasksController = {
   async findMany(req: Request, res: Response) {
     try {
       const projectId = Number(req.params.projectId)
-
-      console.log("projectId:", projectId, "userId:", req.user!.id, "isAdmin:", req.user!.role.includes("ADMIN"))
-
       const userId = req.user!.id
       const isAdmin = req.user!.role.includes("ADMIN")
       const page = Number(req.query["page"]) || 1
@@ -73,60 +71,6 @@ export const tasksController = {
 
   async update(req: Request, res: Response) {
     try {
-      const { id } = req.params as { id: string }
-      const userId = req.user!.id
-      const task = await tasksService.update(id, req.body, userId)
-      return res.status(200).json(task)
-    } catch (error: any) {
-      const isNotFound = error.message?.includes("não encontrada")
-      const isForbidden = error.message?.includes("concluída")
-      return res.status(isNotFound ? 404 : isForbidden ? 409 : 500).json({ message: error.message ?? "Erro ao atualizar tarefa" })
-    }
-  },
-
-  async complete(req: Request, res: Response) {
-    try {
-      const { id } = req.params as { id: string }
-      const userId = req.user!.id
-      const isAdmin = req.user!.role.includes("ADMIN")
-      const task = await tasksService.complete(id, userId, isAdmin)
-      return res.status(200).json(task)
-    } catch (error: any) {
-      const isNotFound = error.message?.includes("não encontrada")
-      const isForbidden = error.message?.includes("permissão") || error.message?.includes("já está")
-      return res.status(isNotFound ? 404 : isForbidden ? 403 : 500).json({ message: error.message ?? "Erro ao concluir tarefa" })
-    }
-  },
-
-  async reopen(req: Request, res: Response) {
-    try {
-      const { id } = req.params as { id: string }
-      const userId = req.user!.id
-      const isAdmin = req.user!.role.includes("ADMIN")
-      const task = await tasksService.reopen(id, userId, isAdmin)
-      return res.status(200).json(task)
-    } catch (error: any) {
-      const isNotFound = error.message?.includes("não encontrada")
-      const isForbidden = error.message?.includes("permissão") || error.message?.includes("Apenas")
-      return res.status(isNotFound ? 404 : isForbidden ? 403 : 500).json({ message: error.message ?? "Erro ao reabrir tarefa" })
-    }
-  },
-
-  async getHistory(req: Request, res: Response) {
-    try {
-      const { id } = req.params as { id: string }
-      const requesterId = req.user!.id
-      const isAdmin = req.user!.role.includes("ADMIN")
-      const history = await HistoryService.findByTaskId({ taskId: id, requesterId, isAdmin })
-      return res.status(200).json(history)
-    } catch (error: any) {
-      const isNotFound = error.message?.includes("não encontrada")
-      return res.status(isNotFound ? 404 : 500).json({ message: error.message ?? "Erro ao buscar histórico" })
-    }
-  },
-
-  async update(req: Request, res: Response) {
-    try {
       const id = Number(req.params.id)
       const userId = req.user!.id
       const isAdmin = req.user!.role.includes("ADMIN")
@@ -147,15 +91,10 @@ export const tasksController = {
         userId,
         isAdmin
       )
-
       return res.status(200).json(task)
     } catch (error: any) {
-      if (error.message === "Tarefa não encontrada") {
-        return res.status(404).json({ message: error.message })
-      }
-      if (error.message === "Sem permissão para editar esta tarefa") {
-        return res.status(403).json({ message: error.message })
-      }
+      if (error.message === "Tarefa não encontrada") return res.status(404).json({ message: error.message })
+      if (error.message === "Sem permissão para editar esta tarefa") return res.status(403).json({ message: error.message })
       return res.status(500).json({ message: "Erro ao editar tarefa" })
     }
   },
@@ -165,20 +104,40 @@ export const tasksController = {
       const id = Number(req.params.id)
       const userId = req.user!.id
       const isAdmin = req.user!.role.includes("ADMIN")
-
       const task = await tasksService.complete(id, userId, isAdmin)
       return res.status(200).json(task)
     } catch (error: any) {
-      if (error.message === "Tarefa não encontrada") {
-        return res.status(404).json({ message: error.message })
-      }
-      if (error.message === "Sem permissão para concluir esta tarefa") {
-        return res.status(403).json({ message: error.message })
-      }
-      if (error.message === "Tarefa já está concluída") {
-        return res.status(400).json({ message: error.message })
-      }
+      if (error.message === "Tarefa não encontrada") return res.status(404).json({ message: error.message })
+      if (error.message === "Sem permissão para concluir esta tarefa") return res.status(403).json({ message: error.message })
+      if (error.message === "Tarefa já está concluída") return res.status(400).json({ message: error.message })
       return res.status(500).json({ message: "Erro ao concluir tarefa" })
+    }
+  },
+
+  async reopen(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id)
+      const userId = req.user!.id
+      const isAdmin = req.user!.role.includes("ADMIN")
+      const task = await tasksService.reopen(id, userId, isAdmin)
+      return res.status(200).json(task)
+    } catch (error: any) {
+      const isNotFound = error.message?.includes("não encontrada")
+      const isForbidden = error.message?.includes("permissão") || error.message?.includes("Apenas")
+      return res.status(isNotFound ? 404 : isForbidden ? 403 : 500).json({ message: error.message ?? "Erro ao reabrir tarefa" })
+    }
+  },
+
+  async getHistory(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id)
+      const requesterId = req.user!.id
+      const isAdmin = req.user!.role.includes("ADMIN")
+      const history = await HistoryService.findByTaskId({ taskId: id, requesterId, isAdmin })
+      return res.status(200).json(history)
+    } catch (error: any) {
+      const isNotFound = error.message?.includes("não encontrada")
+      return res.status(isNotFound ? 404 : 500).json({ message: error.message ?? "Erro ao buscar histórico" })
     }
   }
 }
