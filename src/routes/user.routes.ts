@@ -26,3 +26,7 @@ userRouter.get("/", authenticate, authorize(RoleType.ADMIN), async (req, res, ne
 userRouter.delete("/:id", authenticate, authorize(RoleType.ADMIN), async (req, res, next) => {
   return userController.deleteUser(req, res, next)
 })
+
+userRouter.patch("/:id/promote", authenticate, authorize(RoleType.ADMIN), async (req, res, next) => {
+  return userController.promoteToAdmin(req, res, next)
+})

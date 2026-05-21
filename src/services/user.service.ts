@@ -47,6 +47,12 @@ export class UserService {
     await this.repository.delete(id);
   }
 
+  async promoteToAdmin(id: number) {
+    const user = await this.repository.findById(id)
+    if (!user) throw new NotFoundError("User not found")
+    return this.repository.promoteToAdmin(id)
+  }
+
 }
 
 export const userService = new UserService(userRepository);

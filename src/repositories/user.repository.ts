@@ -2,6 +2,7 @@ import type { PrismaClient } from "../prisma/generated/prisma/client"
 import { prisma } from "../prisma/prisma"
 import type { UpdateProfileDto } from "../common/dtos/user.dto"
 import type { Prisma } from "../prisma/generated/prisma/client"
+import { RoleType } from "../prisma/generated/prisma/client"
 
 const userSelect = {
   id: true,
@@ -59,6 +60,20 @@ export class UserRepository {
   async delete(id: number) {
     return this.prisma.user.delete({ where: { id } })
   }
+
+  async promoteToAdmin(id: number) {
+  const adminRole = await this.prisma.role.findUnique({
+    where: { name: RoleType.ADMIN }
+  })
+  if (!adminRole) throw new Error("Role ADMIN não encontrada")
+  
+  return this.prisma.userRole.create({
+    data: {
+      userId: id,
+      roleId: adminRole.id
+    }
+  })
+}
 }
 
 export const userRepository = new UserRepository(prisma)

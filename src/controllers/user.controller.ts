@@ -56,6 +56,14 @@ class UserController {
       })
     } catch (error) { next(error) }
   }
+
+  async promoteToAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id)
+      await this.service.promoteToAdmin(id)
+      return res.status(200).json({ message: "Usuário promovido a admin" })
+    } catch (error) { next(error) }
+  }
 }
 
 export const userController = new UserController(userService)
