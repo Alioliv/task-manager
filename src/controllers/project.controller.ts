@@ -52,21 +52,40 @@ class ProjectController {
   }
 
   async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      const id = getParam(req.params['id'])
-      const data = UpdateProjectDto.parse(req.body)
-      const project = await this.service.update(id, data)
-      return res.status(200).json({
-        message: 'Projeto atualizado com sucesso',
-        data: project,
-      })
-    } catch (error) { next(error) }
+  try {
+    console.log('UPDATE CHAMOU')
+    console.log(req.params)
+    console.log(req.user)
+
+    const id = getParam(req.params['id'])
+    const data = UpdateProjectDto.parse(req.body)
+
+    const requesterId = req.user!.id
+    const isAdmin = req.user!.role.includes('ADMIN')
+
+    const project = await this.service.update(
+      id,
+      data,
+      requesterId,
+      isAdmin
+    )
+
+    return res.status(200).json({
+      message: 'Projeto atualizado com sucesso',
+      data: project,
+    })
+  } catch (error) {
+    console.log(error)
+    next(error)
   }
+}
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const id = getParam(req.params['id'])
-      await this.service.delete(id)
+      const requesterId = req.user!.id
+      const isAdmin = req.user!.role.includes('ADMIN')
+      await this.service.delete(id, requesterId, isAdmin)
       return res.status(204).send()
     } catch (error) { next(error) }
   }
