@@ -1,7 +1,7 @@
 import { tasksRepository } from "../repositories/tasks.repository"
 import { historyRepository } from "../repositories/history.repository"
-import { EventType } from "../prisma/generated/prisma/client"
-import type { CreateTaskDTO, FindManyTasksDTO } from "../repositories/tasks.repository"
+import { EventType, Status } from "../prisma/generated/prisma"
+import type { CreateTaskDTO, FindManyTasksDTO, UpdateTaskDTO } from "../repositories/tasks.repository"
 
 export const tasksService = {
   async create(data: CreateTaskDTO) {
@@ -16,9 +16,7 @@ export const tasksService = {
 
     const foundIds = await tasksRepository.validateUserIds(userIds)
     const notFound = userIds.filter(id => !foundIds.includes(id))
-    if (notFound.length > 0) {
-      throw new Error(`Usuários não encontrados: ${notFound.join(", ")}`)
-    }
+    if (notFound.length > 0) throw new Error(`Usuários não encontrados: ${notFound.join(", ")}`)
 
     const updated = await tasksRepository.addAssignees(taskId, userIds)
     await historyRepository.create(taskId, EventType.ASSIGNED, userId)
@@ -27,5 +25,41 @@ export const tasksService = {
 
   async findMany(params: FindManyTasksDTO) {
     return await tasksRepository.findMany(params)
+  },
+
+  async update(taskId: string, data: UpdateTaskDTO, userId: number) {
+    const task = await tasksRepository.findById(taskId)
+    if (!task) throw new Error("Tarefa não encontrada")
+    if (task.status === Status.CONCLUIDA) throw new Error("Tarefa concluída não pode ser editada. Reabra primeiro.")
+
+    const updated = await tasksRepository.update(taskId, data)
+    await historyRepository.create(taskId, EventType.UPDATED, userId)
+    return updated
+  },
+
+  async complete(taskId: string, userId: number, isAdmin: boolean) {
+    const task = await tasksRepository.findById(taskId)
+    if (!task) throw new Error("Tarefa não encontrada")
+    if (task.status === Status.CONCLUIDA) throw new Error("Tarefa já está concluída")
+
+    const isAssignee = await tasksRepository.isAssignee(taskId, userId)
+    if (!isAdmin && !isAssignee) throw new Error("Sem permissão para concluir esta tarefa")
+
+    const updated = await tasksRepository.complete(taskId)
+    await historyRepository.create(taskId, EventType.COMPLETED, userId)
+    return updated
+  },
+
+  async reopen(taskId: string, userId: number, isAdmin: boolean) {
+    const task = await tasksRepository.findById(taskId)
+    if (!task) throw new Error("Tarefa não encontrada")
+    if (task.status !== Status.CONCLUIDA) throw new Error("Apenas tarefas concluídas podem ser reabertas")
+
+    const isAssignee = await tasksRepository.isAssignee(taskId, userId)
+    if (!isAdmin && !isAssignee) throw new Error("Sem permissão para reabrir esta tarefa")
+
+    const updated = await tasksRepository.reopen(taskId)
+    await historyRepository.create(taskId, EventType.REOPENED, userId)
+    return updated
   }
 }

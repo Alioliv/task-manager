@@ -17,6 +17,12 @@ export const HistoryService = {
   },
 
   async findByTaskId({ taskId, requesterId, isAdmin }: FindByTaskIdOptions) {
+    const task = await tasksRepository.findById(taskId)
+    if (!task) throw new Error("Tarefa não encontrada")
+
+    if (isAdmin) {
+      return await historyRepository.findByTaskId(taskId)
+    }
     if (isAdmin) {
       return await historyRepository.findByTaskId(taskId)
     }
