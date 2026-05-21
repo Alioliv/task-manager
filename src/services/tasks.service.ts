@@ -34,6 +34,14 @@ export const tasksService = {
     const isAssigned = task.assignees.some(a => a.id === userId)
     if (!isAdmin && !isAssigned) throw new Error("Sem permissão para editar esta tarefa")
 
+    if (data.status === Status.CONCLUIDA && task.status === Status.CONCLUIDA) {
+      throw new Error("Tarefa já está concluída")
+    }
+
+    if (data.status === Status.PENDENTE && task.status !== Status.CONCLUIDA) {
+      throw new Error("Apenas tarefas concluídas podem ser reabertas")
+    }
+
     const updated = await tasksRepository.update(taskId, data)
 
     const eventType = data.status === Status.CONCLUIDA
