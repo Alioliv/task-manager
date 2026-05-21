@@ -2,6 +2,7 @@ import type { Request, Response } from "express"
 import { HistoryService } from "../services/history.service"
 import { tasksService } from "../services/tasks.service"
 import { tasksRepository } from "../repositories/tasks.repository"
+import { Status } from "../prisma/generated/prisma/client"
 
 export const tasksController = {
   async create(req: Request, res: Response) {
@@ -15,7 +16,7 @@ export const tasksController = {
         ...(dueDate && { dueDate: new Date(dueDate) }),
         priority,
         createdById,
-        ...(projectId && { projectId })
+        ...(projectId && { projectId: Number(projectId) })
       })
 
       return res.status(201).json(task)
@@ -26,7 +27,7 @@ export const tasksController = {
 
   async addAssignees(req: Request, res: Response) {
     try {
-      const { id } = req.params as { id: string }
+      const id = Number(req.params.id)
       const { userIds } = req.body
       const userId = req.user!.id
 
@@ -40,7 +41,10 @@ export const tasksController = {
 
   async findMany(req: Request, res: Response) {
     try {
-      const { projectId } = req.params as { projectId: string }
+      const projectId = Number(req.params.projectId)
+
+      console.log("projectId:", projectId, "userId:", req.user!.id, "isAdmin:", req.user!.role.includes("ADMIN"))
+
       const userId = req.user!.id
       const isAdmin = req.user!.role.includes("ADMIN")
       const page = Number(req.query["page"]) || 1
@@ -62,7 +66,7 @@ export const tasksController = {
 
   async getHistory(req: Request, res: Response) {
     try {
-      const { id } = req.params as { id: string }
+      const id = Number(req.params.id)
       const task = await tasksRepository.findById(id)
       if (!task) {
         return res.status(404).json({ message: "Tarefa não encontrada" })
@@ -71,6 +75,63 @@ export const tasksController = {
       return res.status(200).json(history)
     } catch (error) {
       return res.status(500).json({ message: "Erro ao buscar histórico" })
+    }
+  },
+
+  async update(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id)
+      const userId = req.user!.id
+      const isAdmin = req.user!.role.includes("ADMIN")
+      const { title, description, dueDate, status } = req.body
+
+      if (status && !Object.values(Status).includes(status)) {
+        return res.status(400).json({ message: "Status inválido" })
+      }
+
+      const task = await tasksService.update(
+        id,
+        {
+          ...(title !== undefined && { title }),
+          ...(description !== undefined && { description }),
+          ...(dueDate !== undefined && { dueDate: dueDate ? new Date(dueDate) : null }),
+          ...(status !== undefined && { status })
+        },
+        userId,
+        isAdmin
+      )
+
+      return res.status(200).json(task)
+    } catch (error: any) {
+      if (error.message === "Tarefa não encontrada") {
+        return res.status(404).json({ message: error.message })
+      }
+      if (error.message === "Sem permissão para editar esta tarefa") {
+        return res.status(403).json({ message: error.message })
+      }
+      return res.status(500).json({ message: "Erro ao editar tarefa" })
+    }
+  },
+
+  async complete(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id)
+      const userId = req.user!.id
+      const isAdmin = req.user!.role.includes("ADMIN")
+
+      const task = await tasksService.complete(id, userId, isAdmin)
+      return res.status(200).json(task)
+    } catch (error: any) {
+      if (error.message === "Tarefa não encontrada") {
+        return res.status(404).json({ message: error.message })
+      }
+      if (error.message === "Sem permissão para concluir esta tarefa") {
+        return res.status(403).json({ message: error.message })
+      }
+      if (error.message === "Tarefa já está concluída") {
+        return res.status(400).json({ message: error.message })
+      }
+      return res.status(500).json({ message: "Erro ao concluir tarefa" })
     }
   }
 }
