@@ -14,11 +14,11 @@ app.use("/auth", authRouter)
 // === USERS ===
 app.use("/users", userRouter)
 
-// === PROJETOS ===
-app.use('/projects', projectRouter)
-
 // === TAREFAS ===
 app.use("/projects/:projectId/tasks", tasksRouter)
+
+// === PROJETOS ===
+app.use('/projects', projectRouter)
 
 app.use(errorHandler)
 

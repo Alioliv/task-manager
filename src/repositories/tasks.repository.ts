@@ -1,5 +1,5 @@
 import { prisma } from "../prisma/prisma"
-import { Priority, Status } from "../prisma/generated/prisma"
+import { Priority, Status } from "../prisma/generated/prisma/client"
 
 export interface CreateTaskDTO {
   title: string
@@ -7,11 +7,11 @@ export interface CreateTaskDTO {
   dueDate?: Date
   priority: Priority
   createdById: number
-  projectId?: string
+  projectId?: number
 }
 
 export interface FindManyTasksDTO {
-  projectId: string
+  projectId: number
   userId?: number
   isAdmin: boolean
   page: number
@@ -25,8 +25,8 @@ export interface FindManyTasksDTO {
 export interface UpdateTaskDTO {
   title?: string
   description?: string
-  dueDate?: Date
-  priority?: Priority
+  dueDate?: Date | null
+  status?: Status
 }
 
 export const tasksRepository = {
@@ -36,16 +36,19 @@ export const tasksRepository = {
     })
   },
 
-  async findById(id: string) {
+  async findById(id: number) {
     return await prisma.task.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        assignees: { select: { id: true } }
+      }
     })
   },
 
   async findMany({ projectId, userId, isAdmin, page, limit, status, priority, dueDateFrom, dueDateTo }: FindManyTasksDTO) {
     const skip = (page - 1) * limit
 
-    const where = {
+    const where: any = {
       projectId,
       ...(!isAdmin && userId ? { assignees: { some: { id: userId } } } : {}),
       ...(status ? { status } : {}),
@@ -66,14 +69,12 @@ export const tasksRepository = {
     return { tasks, total, page, limit }
   },
 
-  async addAssignees(taskId: string, userIds: number[]) {
+  async addAssignees(taskId: number, userIds: number[]) {
     return await prisma.task.update({
       where: { id: taskId },
       data: { assignees: { connect: userIds.map(id => ({ id })) } },
       include: {
-        assignees: {
-          select: { id: true, name: true, email: true, createdAt: true }
-        }
+        assignees: { select: { id: true, name: true, email: true, createdAt: true } }
       }
     })
   },
@@ -86,28 +87,25 @@ export const tasksRepository = {
     return users.map(u => u.id)
   },
 
-  async update(id: string, data: UpdateTaskDTO) {
+  async update(id: number, data: UpdateTaskDTO) {
+    return await prisma.task.update({ where: { id }, data })
+  },
+
+  async complete(id: number) {
     return await prisma.task.update({
       where: { id },
-      data
+      data: { status: Status.CONCLUIDA }
     })
   },
 
-  async complete(id: string) {
+  async reopen(id: number) {
     return await prisma.task.update({
       where: { id },
-      data: { status: Status.CONCLUIDA, completedAt: new Date() }
+      data: { status: Status.PENDENTE }
     })
   },
 
-  async reopen(id: string) {
-    return await prisma.task.update({
-      where: { id },
-      data: { status: Status.PENDENTE, completedAt: null }
-    })
-  },
-
-  async isAssignee(taskId: string, userId: number) {
+  async isAssignee(taskId: number, userId: number) {
     const task = await prisma.task.findFirst({
       where: { id: taskId, assignees: { some: { id: userId } } }
     })
