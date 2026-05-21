@@ -7,7 +7,7 @@ class UserController {
 
   async getMe(req: Request, res: Response, next: NextFunction) {
     try {
-      const idUser = Number(req.params.id)
+      const idUser = req.user!.id
       const dataUser = await this.service.getMe(idUser)
       return res.status(200).json({
         message: "Usuário encontrado!",
@@ -18,7 +18,7 @@ class UserController {
 
   async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {
-      const idUser = Number(req.params.id)
+      const idUser = req.user!.id
       const dataToUpdate = req.body as UpdateProfileDto
       const updatedUser = await this.service.updateProfile(idUser, dataToUpdate)
       return res.status(200).json({
@@ -30,7 +30,7 @@ class UserController {
 
   async updatePassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const idUser = Number(req.params.id)
+      const idUser = req.user!.id
       const passwordToUpdate = req.body as UpdatePasswordDto
       await this.service.updatePassword(idUser, passwordToUpdate)
       return res.status(204).send()
@@ -49,7 +49,7 @@ class UserController {
 
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const idUser = Number(req.params.id)
+      const idUser = req.user!.id
       const userDeleted = await this.service.deleteUser(idUser)
       return res.status(200).json({
         message: "Usuário deletado com sucesso",
