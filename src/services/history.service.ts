@@ -23,6 +23,10 @@ export const HistoryService = {
     if (isAdmin) {
       return await historyRepository.findByTaskId(taskId)
     }
+    if (isAdmin) {
+      return await historyRepository.findByTaskId(taskId)
+    }
+
     return await historyRepository.findByTaskIdAndUser(taskId, requesterId)
   }
 }
