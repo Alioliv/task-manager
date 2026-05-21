@@ -1,6 +1,6 @@
-import { NotFoundError } from '../common/errors'
+import { NotFoundError, ForbiddenError } from '../common/errors'
 import { ProjectRepository, projectRepository } from '../repositories/project.repository'
-import type { CreateProjectDto,UpdateProjectDto } from '../common/dtos/project.dto'
+import type { CreateProjectDto, UpdateProjectDto } from '../common/dtos/project.dto'
 
 export class ProjectService {
   constructor(private readonly repository: ProjectRepository) {}
@@ -27,13 +27,23 @@ export class ProjectService {
     return this.repository.create(data)
   }
 
-  async update(id: string, data: UpdateProjectDto) {
-    await this.getById(id)
+  async update(id: string, data: UpdateProjectDto, requesterId: number, isAdmin: boolean) {
+    const project = await this.getById(id)
+
+    if (!isAdmin && project.ownerId !== requesterId) {
+      throw new ForbiddenError('Você não tem permissão para editar este projeto')
+    }
+
     return this.repository.update(id, data)
   }
 
-  async delete(id: string) {
-    await this.getById(id)
+  async delete(id: string, requesterId: number, isAdmin: boolean) {
+    const project = await this.getById(id)
+
+    if (!isAdmin && project.ownerId !== requesterId) {
+      throw new ForbiddenError('Você não tem permissão para deletar este projeto')
+    }
+
     return this.repository.delete(id)
   }
 }
