@@ -2,7 +2,7 @@ import { prisma } from "../prisma/prisma"
 import { EventType } from "../prisma/generated/prisma/client"
 
 export const historyRepository = {
-  async create(taskId: string, eventType: EventType, userId?: number) {
+  async create(taskId: number, eventType: EventType, userId?: number) {
     return await prisma.history.create({
       data: {
         taskId,
@@ -12,7 +12,7 @@ export const historyRepository = {
     })
   },
 
-  async findByTaskId(taskId: string) {
+  async findByTaskId(taskId: number) {
     return await prisma.history.findMany({
       where: { taskId },
       orderBy: { createdAt: "desc" },
