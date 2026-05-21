@@ -10,7 +10,7 @@ export const HistoryService = {
     return task
   },
 
-  async findByTaskId(taskId: string) {
+  async findByTaskId(taskId: number) {
     return await historyRepository.findByTaskId(taskId)
   }
 }
