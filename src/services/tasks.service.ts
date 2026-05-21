@@ -35,7 +35,14 @@ export const tasksService = {
     if (!isAdmin && !isAssigned) throw new Error("Sem permissão para editar esta tarefa")
 
     const updated = await tasksRepository.update(taskId, data)
-    await historyRepository.create(taskId, EventType.UPDATED, userId)
+
+    const eventType = data.status === Status.CONCLUIDA
+      ? EventType.COMPLETED
+      : data.status === Status.PENDENTE
+        ? EventType.REOPENED
+        : EventType.UPDATED
+
+    await historyRepository.create(taskId, eventType, userId)
     return updated
   },
 
