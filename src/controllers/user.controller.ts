@@ -49,7 +49,7 @@ class UserController {
 
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const idUser = req.user!.id
+      const idUser = Number(req.params.id)
       const userDeleted = await this.service.deleteUser(idUser)
       return res.status(200).json({
         message: "Usuário deletado com sucesso",
