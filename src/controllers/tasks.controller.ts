@@ -7,7 +7,8 @@ import { Priority, Status } from "../prisma/generated/prisma/client"
 export const tasksController = {
   async create(req: Request, res: Response) {
     try {
-      const { title, description, dueDate, priority, projectId } = req.body
+      const { title, description, dueDate, priority } = req.body
+      const projectId = Number(req.params.projectId)
       const createdById = req.user!.id
       const task = await tasksService.create({
         title,
